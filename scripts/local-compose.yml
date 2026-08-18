@@ -1,0 +1,12 @@
+name: reppo
+
+include:
+  - ../services/reppo-api/compose.yml
+  - ../services/reppo-database/compose.yml
+  - ../services/reppo-dashboard/compose.yml
+  - ../services/reppo-proxy/compose.yml
+  - ../services/reppo-website/compose.yml
+
+networks:
+  reppo:
+    name: reppo

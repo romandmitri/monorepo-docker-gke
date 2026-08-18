@@ -1,0 +1,15 @@
+.DS_Store
+.idea
+.vsls.json
+.vscode
+
+# Just in case a node package manager is called from root folder.
+node_modules/
+yarn/
+/yarn.lock
+/package.json
+/package-lock.json
+/pnpm-lock.yaml
+
+# https://github.com/google-github-actions/auth
+gha-creds-*.json

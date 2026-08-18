@@ -1,0 +1,181 @@
+# Force 9.
+name: reppo-website
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+      - 'hotfix'
+      - 'staging'
+      - 'development'
+    paths:
+      - '.github/workflows/reppo-website.yml'
+      - 'services/reppo-website/**'
+  pull_request:
+    paths:
+      - '.github/workflows/reppo-website.yml'
+      - 'services/reppo-website/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  GCP_PROJECT_RUNNER: "cheese-reppo-runner-01"
+  GCP_PROJECT_DEV: "cheese-reppo-c-dev-01"
+  GCP_PROJECT_STAGE: "cheese-reppo-c-stage-01"
+  GCP_PROJECT_PROD: "cheese-reppo-c-prod-01"
+  GCP_REGISTRY_HOST: 'us-east4-docker.pkg.dev'
+  IMAGE: 'us-east4-docker.pkg.dev/cheese-reppo-common-01/docker/reppo-website:${{ github.sha }}'
+  SCRIPTS: '${{ github.workspace }}/.github/scripts'
+
+jobs:
+
+  website-test:
+    # Only run on PRs to [staging] or [main] branch.
+    if: github.event_name == 'pull_request' && contains(fromJSON('["staging","main"]'), github.base_ref)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_TERRAFORM_CREDENTIALS }}
+          project_id: ${{ env.GCP_PROJECT_RUNNER }}
+      # TODO: reidenzon - Limit boot profile to WEBSITE+API+DB only.
+      - run: make runner-boot
+      - run: make reppo-website-runner-type
+      - run: make reppo-website-runner-test
+
+  # ==== DEVELOPMENT =====================================
+
+  website-dev-build:
+    if: contains(fromJSON('["development"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/reppo-website
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_TERRAFORM_CREDENTIALS }}
+          project_id: ${{ env.GCP_PROJECT_DEV }}
+      - run: $SCRIPTS/docker-secrets.sh --service="reppo-website"
+      - run: $SCRIPTS/docker-secrets-github.sh
+      - run: gcloud auth configure-docker ${{ env.GCP_REGISTRY_HOST }}
+      - run: docker build --tag "${{ env.IMAGE }}-dev" --file Dockerfile.cluster .
+      - run: docker push "${{ env.IMAGE }}-dev"
+
+  website-dev-deploy:
+    if: contains(fromJSON('["development"]'), github.ref_name)
+    needs: [ website-dev-build ]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/reppo-website
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_TERRAFORM_CREDENTIALS }}
+          project_id: ${{ env.GCP_PROJECT_DEV }}
+      - uses: google-github-actions/get-gke-credentials@v3
+        with:
+          cluster_name: 'cluster'
+          location: "us-east4"
+      - run: $SCRIPTS/kubectl-secrets.sh --service="reppo-website"
+      - run: $SCRIPTS/kubectl-replace.sh --resource="kubernetes" --key="@IMAGE" --value="${{ env.IMAGE }}-dev"
+      - run: $SCRIPTS/kubectl-replace.sh --resource="kubernetes" --key="@REPLICAS" --value="1"
+      - run: $SCRIPTS/kubectl-apply.sh --resource="kubernetes"
+      - run: $SCRIPTS/kubectl-deployment-status.sh --deployment="reppo-website"
+
+  # ==== STAGING =====================================
+
+  website-stage-build:
+    if: contains(fromJSON('["staging","hotfix"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/reppo-website
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_TERRAFORM_CREDENTIALS }}
+          project_id: ${{ env.GCP_PROJECT_STAGE }}
+      - run: $SCRIPTS/docker-secrets.sh --service="reppo-website"
+      - run: $SCRIPTS/docker-secrets-github.sh
+      - run: gcloud auth configure-docker ${{ env.GCP_REGISTRY_HOST }}
+      - run: docker build --tag "${{ env.IMAGE }}-stage" --file Dockerfile.cluster .
+      - run: docker push "${{ env.IMAGE }}-stage"
+
+  website-stage-deploy:
+    if: contains(fromJSON('["staging","hotfix"]'), github.ref_name)
+    needs: [ website-stage-build ]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/reppo-website
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_TERRAFORM_CREDENTIALS }}
+          project_id: ${{ env.GCP_PROJECT_STAGE }}
+      - uses: google-github-actions/get-gke-credentials@v3
+        with:
+          cluster_name: 'cluster'
+          location: "us-east4"
+      - run: $SCRIPTS/kubectl-secrets.sh --service="reppo-website"
+      - run: $SCRIPTS/kubectl-replace.sh --resource="kubernetes" --key="@IMAGE" --value="${{ env.IMAGE }}-stage"
+      - run: $SCRIPTS/kubectl-replace.sh --resource="kubernetes" --key="@REPLICAS" --value="1"
+      - run: $SCRIPTS/kubectl-apply.sh --resource="kubernetes"
+      - run: $SCRIPTS/kubectl-deployment-status.sh --deployment="reppo-website"
+
+  # ==== PRODUCTION =====================================
+
+  website-prod-build:
+    if: contains(fromJSON('["main"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/reppo-website
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_TERRAFORM_CREDENTIALS }}
+          project_id: ${{ env.GCP_PROJECT_PROD }}
+      - run: $SCRIPTS/docker-secrets.sh --service="reppo-website"
+      - run: $SCRIPTS/docker-secrets-github.sh
+      - run: gcloud auth configure-docker ${{ env.GCP_REGISTRY_HOST }}
+      - run: docker build --tag "${{ env.IMAGE }}-prod" --file Dockerfile.cluster .
+      - run: docker push "${{ env.IMAGE }}-prod"
+
+  website-prod-deploy:
+    needs: [ website-prod-build ]
+    if: contains(fromJSON('["main"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/reppo-website
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_TERRAFORM_CREDENTIALS }}
+          project_id: ${{ env.GCP_PROJECT_PROD }}
+      - uses: google-github-actions/get-gke-credentials@v3
+        with:
+          cluster_name: 'cluster'
+          location: "us-east4"
+      - run: $SCRIPTS/kubectl-secrets.sh --service="reppo-website"
+      - run: $SCRIPTS/kubectl-replace.sh --resource="kubernetes" --key="@IMAGE" --value="${{ env.IMAGE }}-prod"
+      - run: $SCRIPTS/kubectl-replace.sh --resource="kubernetes" --key="@REPLICAS" --value="1"
+      - run: $SCRIPTS/kubectl-apply.sh --resource="kubernetes"
+      - run: $SCRIPTS/kubectl-deployment-status.sh --deployment="reppo-website"

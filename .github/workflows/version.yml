@@ -1,0 +1,29 @@
+name: version
+
+on:
+  push:
+    branches:
+      - 'main'
+    tags-ignore:
+      - '**'
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  id-token: write
+
+env:
+  SCRIPTS: '${{ github.workspace }}/.github/scripts'
+
+jobs:
+
+  tag:
+    # Probably do NOT need this, but safer to prevent loop if [tags-ignore] is touched.
+    if: contains(fromJSON('["main"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: $SCRIPTS/version-tag.sh

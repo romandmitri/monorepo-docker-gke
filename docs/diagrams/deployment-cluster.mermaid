@@ -1,0 +1,92 @@
+---
+config:
+  theme: neutral
+---
+flowchart TB
+    classDef titleStyle fill: #FFF, stroke: #000, color: #000, font-size: 1em, font-weight: bold;
+    classDef noteStyle fill: #FFA, stroke: #A00, color: #000, font-size: .9em;
+
+    title["Deployment: Cluster, v20260818.01 © Cheese Industries Inc"]:::titleStyle
+    title~~~diagram
+    subgraph diagram ["_"]
+        direction TB
+
+        subgraph reppoInfrastructure ["reppo-infrastructure"]
+                reppoInfrastructureNote["`GCP infrastructure is orchestrated from local **reppo-infrastructure** container using **terraform** tool.`"]:::noteStyle
+        end
+        reppoInfrastructure ---->|Orchestrates| infrastructure
+
+        subgraph browser ["Browser (ie: Chrome, Firefox, etc...)"]
+        end
+
+
+        subgraph infrastructure ["Infrastructure (via Google Cloud Platform)"]
+
+            subgraph secretManager ["Google Secret Manager"]
+                secretManagerNote["`Separate **ENVs** for each project are loaded via **CI/CD Pipeline** into Kubernetes cluster as **reppo-secrets** resources.`"]:::noteStyle
+            end
+
+            subgraph loadBalancer ["Load Balancer"]
+                loadBalancerNote["`Synced to reflect **ingress** resource in Kubernetes.`"]:::noteStyle
+            end
+
+            subgraph kubernetes ["Kubernetes"]
+
+                subgraph secrets ["Secrets"]
+                    secretsNote["`Separate **secret** resources for each container, ie: **reppo-api**, **reppo-dashboard**, **reppo-website**.`"]:::noteStyle
+                end
+
+                subgraph ingress ["Ingress"]
+                    ingressNote["Manages the GCP Load Balancer."]:::noteStyle
+                end
+
+                subgraph services ["Services"]
+                    subgraph reppoApi ["reppo-api"]
+                        reppoApiNote["`API via Fastify.
+                        Receives webhooks from: Retell.
+                        Used for **database** tunnel.
+                        Schedules and triggers **cron** jobs.
+                        `"]:::noteStyle
+                    end
+
+                    subgraph reppoDashboard ["reppo-dashboard"]
+                        reppoDashboardNote["React via Vite"]:::noteStyle
+                    end
+
+                    subgraph reppoWebsite["reppo-website"]
+                        reppoWebsiteNote["Next.js"]:::noteStyle
+                    end
+                end
+
+            end
+
+            secretManager -->|Copy|secrets
+            secrets -.->|Injected|services
+
+            loadBalancer -..-> |Managed by| ingress
+            loadBalancer ---->|Routes| services
+
+            subgraph data ["Data"]
+                direction TB
+                subgraph bigQuery ["`BigQuery`"]
+                    bigQueryNote["Analytics."]:::noteStyle
+                end
+                subgraph database ["`Database`"]
+                    databaseNote[("PostgreSQL")]:::noteStyle
+                end
+                subgraph storage ["`Storage`"]
+                    storageNode["`Read access via **Signed URL** only.`"]:::noteStyle
+                end
+            end
+            reppoApi --->|Read/Write|data
+
+        end
+
+        browser -->|Calls| loadBalancer
+
+        subgraph integrations ["Integrations"]
+           integrationsNote["`See **integrations** diagram.`"]:::noteStyle
+        end
+%%        reppoApi & reppoDashboard & reppoWebsite ----->|Calls| integrations
+        services ----->|Calls| integrations
+    end

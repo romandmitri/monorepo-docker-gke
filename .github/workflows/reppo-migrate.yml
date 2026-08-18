@@ -1,0 +1,201 @@
+name: reppo-migrate
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+      - 'hotfix'
+      - 'staging'
+      - 'development'
+    paths:
+      - '.github/workflows/reppo-migrate.yml'
+      - 'services/reppo-migrate/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  GCP_PROJECT_DEV: "cheese-reppo-c-dev-01"
+  GCP_PROJECT_STAGE: "cheese-reppo-c-stage-01"
+  GCP_PROJECT_PROD: "cheese-reppo-c-prod-01"
+  GCP_REGISTRY_HOST: 'us-east4-docker.pkg.dev'
+  IMAGE: 'us-east4-docker.pkg.dev/cheese-reppo-common-01/docker/reppo-migrate:${{ github.sha }}'
+  SCRIPTS: '${{ github.workspace }}/.github/scripts'
+
+jobs:
+
+  # ==== DEVELOPMENT =====================================
+
+  migrate-dev-backup:
+    if: contains(fromJSON('["development"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_TERRAFORM_CREDENTIALS }}
+          project_id: ${{ env.GCP_PROJECT_DEV }}
+      - uses: google-github-actions/get-gke-credentials@v3
+        with:
+          cluster_name: 'cluster'
+          location: "us-east4"
+      - run: $SCRIPTS/gcloud-sql-backup.sh --instance="sql-01" --project="${{ env.GCP_PROJECT_DEV }}" --limit=30
+
+  migrate-dev-build:
+    if: contains(fromJSON('["development"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/reppo-migrate
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_TERRAFORM_CREDENTIALS }}
+          project_id: ${{ env.GCP_PROJECT_DEV }}
+      - run: $SCRIPTS/docker-secrets-github.sh
+      - run: gcloud auth configure-docker ${{ env.GCP_REGISTRY_HOST }}
+      - run: cp -r ${{ github.workspace }}/scripts/common scripts/common
+      - run: docker build --tag ${{ env.IMAGE }} --file Dockerfile.cluster .
+      - run: docker push ${{ env.IMAGE }}
+
+  migrate-dev-migrate:
+    if: contains(fromJSON('["development"]'), github.ref_name)
+    needs: [ migrate-dev-backup, migrate-dev-build ]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/reppo-migrate
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_TERRAFORM_CREDENTIALS }}
+          project_id: ${{ env.GCP_PROJECT_DEV }}
+      - uses: google-github-actions/get-gke-credentials@v3
+        with:
+          cluster_name: 'cluster'
+          location: "us-east4"
+      - run: $SCRIPTS/kubectl-secrets.sh --service="reppo-migrate"
+      - run: $SCRIPTS/kubectl-replace.sh --resource="kubernetes" --key="@IMAGE" --value="${{ env.IMAGE }}"
+      - run: $SCRIPTS/kubectl-apply.sh --resource="kubernetes"
+      - run: $SCRIPTS/kubectl-job-status.sh --job="reppo-migrate"
+
+  # ==== STAGING =====================================
+
+  migrate-stage-backup:
+    if: contains(fromJSON('["staging","hotfix"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_TERRAFORM_CREDENTIALS }}
+          project_id: ${{ env.GCP_PROJECT_STAGE }}
+      - uses: google-github-actions/get-gke-credentials@v3
+        with:
+          cluster_name: 'cluster'
+          location: "us-east4"
+      - run: $SCRIPTS/gcloud-sql-backup.sh --instance="sql-01" --project="${{ env.GCP_PROJECT_STAGE }}" --limit=30
+
+  migrate-stage-build:
+    if: contains(fromJSON('["staging","hotfix"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/reppo-migrate
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_TERRAFORM_CREDENTIALS }}
+          project_id: ${{ env.GCP_PROJECT_STAGE }}
+      - run: $SCRIPTS/docker-secrets-github.sh
+      - run: gcloud auth configure-docker ${{ env.GCP_REGISTRY_HOST }}
+      - run: cp -r ${{ github.workspace }}/scripts/common scripts/common
+      - run: docker build --tag ${{ env.IMAGE }} --file Dockerfile.cluster .
+      - run: docker push ${{ env.IMAGE }}
+
+  migrate-stage-migrate:
+    if: contains(fromJSON('["staging","hotfix"]'), github.ref_name)
+    needs: [ migrate-stage-backup, migrate-stage-build ]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/reppo-migrate
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_TERRAFORM_CREDENTIALS }}
+          project_id: ${{ env.GCP_PROJECT_STAGE }}
+      - uses: google-github-actions/get-gke-credentials@v3
+        with:
+          cluster_name: 'cluster'
+          location: "us-east4"
+      - run: $SCRIPTS/kubectl-secrets.sh --service="reppo-migrate"
+      - run: $SCRIPTS/kubectl-replace.sh --resource="kubernetes" --key="@IMAGE" --value="${{ env.IMAGE }}"
+      - run: $SCRIPTS/kubectl-apply.sh --resource="kubernetes"
+      - run: $SCRIPTS/kubectl-job-status.sh --job="reppo-migrate"
+
+  # ==== PRODUCTION =====================================
+
+  migrate-prod-backup:
+    if: contains(fromJSON('["main"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_TERRAFORM_CREDENTIALS }}
+          project_id: ${{ env.GCP_PROJECT_PROD }}
+      - uses: google-github-actions/get-gke-credentials@v3
+        with:
+          cluster_name: 'cluster'
+          location: "us-east4"
+      - run: $SCRIPTS/gcloud-sql-backup.sh --instance="sql-01" --project="${{ env.GCP_PROJECT_PROD }}" --limit=30
+
+  migrate-prod-build:
+    if: contains(fromJSON('["main"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/reppo-migrate
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_TERRAFORM_CREDENTIALS }}
+      - run: $SCRIPTS/docker-secrets-github.sh
+      - run: gcloud auth configure-docker ${{ env.GCP_REGISTRY_HOST }}
+      - run: cp -r ${{ github.workspace }}/scripts/common scripts/common
+      - run: docker build --tag ${{ env.IMAGE }} --file Dockerfile.cluster .
+      - run: docker push ${{ env.IMAGE }}
+
+  migrate-prod-migrate:
+    needs: [ migrate-prod-backup, migrate-prod-build ]
+    if: contains(fromJSON('["main"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/reppo-migrate
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_TERRAFORM_CREDENTIALS }}
+          project_id: ${{ env.GCP_PROJECT_PROD }}
+      - uses: google-github-actions/get-gke-credentials@v3
+        with:
+          cluster_name: 'cluster'
+          location: "us-east4"
+      - run: $SCRIPTS/kubectl-secrets.sh --service="reppo-migrate"
+      - run: $SCRIPTS/kubectl-replace.sh --resource="kubernetes" --key="@IMAGE" --value="${{ env.IMAGE }}"
+      - run: $SCRIPTS/kubectl-apply.sh --resource="kubernetes"
+      - run: $SCRIPTS/kubectl-job-status.sh --job="reppo-migrate"

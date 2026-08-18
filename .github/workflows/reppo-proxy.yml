@@ -1,0 +1,95 @@
+name: reppo-proxy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+      - 'hotfix'
+      - 'staging'
+      - 'development'
+    paths:
+      - '.github/workflows/reppo-proxy.yml'
+      - 'services/reppo-proxy/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  GCP_PROJECT_DEV: "cheese-reppo-c-dev-01"
+  GCP_PROJECT_STAGE: "cheese-reppo-c-stage-01"
+  GCP_PROJECT_PROD: "cheese-reppo-c-prod-01"
+  SCRIPTS: '${{ github.workspace }}/.github/scripts'
+
+jobs:
+
+  # ==== DEVELOPMENT =====================================
+
+  proxy-dev-ingress:
+    if: contains(fromJSON('["development"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/reppo-proxy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_TERRAFORM_CREDENTIALS }}
+          project_id: ${{ env.GCP_PROJECT_DEV }}
+      - uses: google-github-actions/get-gke-credentials@v3
+        with:
+          cluster_name: 'cluster'
+          location: "us-east4"
+      - run: $SCRIPTS/kubectl-replace.sh --resource="kubernetes/reppo-ingress-config" --key="@INGRESS_CERT_DOMAIN" --value="cheese-dev.app"
+      - run: $SCRIPTS/kubectl-apply.sh --resource="kubernetes/reppo-ingress-config"
+      - run: $SCRIPTS/kubectl-apply.sh --resource="kubernetes/reppo-ingress"
+
+  # ==== STAGING =====================================
+
+  proxy-stage-ingress:
+    if: contains(fromJSON('["staging","hotfix"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/reppo-proxy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_TERRAFORM_CREDENTIALS }}
+          project_id: ${{ env.GCP_PROJECT_STAGE }}
+      - uses: google-github-actions/get-gke-credentials@v3
+        with:
+          cluster_name: 'cluster'
+          location: "us-east4"
+      - run: $SCRIPTS/kubectl-replace.sh --resource="kubernetes/reppo-ingress-config" --key="@INGRESS_CERT_DOMAIN" --value="reppo-stage.cheeseindustries.ca"
+      - run: $SCRIPTS/kubectl-apply.sh --resource="kubernetes/reppo-ingress-config"
+      - run: $SCRIPTS/kubectl-apply.sh --resource="kubernetes/reppo-ingress"
+
+  # ==== PRODUCTION =====================================
+
+  proxy-prod-ingress:
+    if: contains(fromJSON('["main"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/reppo-proxy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_TERRAFORM_CREDENTIALS }}
+          project_id: ${{ env.GCP_PROJECT_PROD }}
+      - uses: google-github-actions/get-gke-credentials@v3
+        with:
+          cluster_name: 'cluster'
+          location: "us-east4"
+      - run: $SCRIPTS/kubectl-replace.sh --resource="kubernetes/reppo-ingress-config" --key="@INGRESS_CERT_DOMAIN" --value="reppo.cheeseindustries.ca"
+      - run: $SCRIPTS/kubectl-apply.sh --resource="kubernetes/reppo-ingress-config"
+      - run: $SCRIPTS/kubectl-apply.sh --resource="kubernetes/reppo-ingress"

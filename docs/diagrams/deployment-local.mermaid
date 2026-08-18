@@ -1,0 +1,91 @@
+---
+config:
+  theme: neutral
+---
+flowchart TB
+    classDef titleStyle fill: #FFF, stroke: #000, color: #000, font-size: 1em, font-weight: bold;
+    classDef noteStyle fill: #FFA, stroke: #A00, color: #000, font-size: .9em;
+
+    title["Deployment: Local, v2026818.01 © Cheese Industries Inc."]:::titleStyle
+    title~~~diagram
+    subgraph diagram ["_"]
+        direction TB
+
+        subgraph devices ["Devices"]
+            subgraph mobile ["Mobile"]
+                subgraph mobileBrowser ["Browser"]
+                end
+            end
+        end
+
+        mobileBrowser ----->|Calls| reppoProxy
+
+        subgraph host ["Host (ie: Computer)"]
+
+            subgraph browser ["Browser (ie: Chrome, Firefox, etc...)"]
+            end
+
+            subgraph drive ["Drive"]
+                subgraph makeLocalBoot ["make local-boot"]
+                    makeLocalBootNote["`The **make local-boot** script orchestrates local **Docker** containers.`"]:::noteStyle
+                end
+            end
+
+            makeLocalBoot --->|Orchestrates| docker
+            browser --->|Calls| reppoProxy
+
+            subgraph docker ["Docker (Containers)"]
+                dockerNote["`ENVs for Docker containers come from Google Secret Manager`"]:::noteStyle
+                dockerNote~~~reppoProxy
+
+                subgraph reppoProxy ["reppo-proxy"]
+                    reppoProxyNote["`Nginx proxy to expose services. Helps keep consistent base URL on a single port, ie: http://localhost:2000`"]:::noteStyle
+                end
+
+                subgraph reppoInfrastructure ["reppo-infrastructure"]
+                    reppoInfrastructureNote["`Tools for managing infrastructure including: **terraform**, gcloud, kubectl, etc...`"]:::noteStyle
+                end
+
+                subgraph reppoDashboard ["reppo-dashboard"]
+                    reppoDashboardNote["React via Vite"]:::noteStyle
+                end
+
+                subgraph reppoWebsite["reppo-website"]
+                    reppoWebsiteNote["Next.js"]:::noteStyle
+                end
+
+                subgraph reppoApi ["reppo-api"]
+                    reppoApiNote["`API via Fastify.
+                    Receives webhooks from: Retell.
+                    Schedules and triggers **cron** jobs.`"]:::noteStyle
+                end
+
+                reppoProxy --->|Routes| reppoApi
+                reppoProxy --->|Routes| reppoDashboard
+                reppoProxy --->|Routes| reppoWebsite
+
+                subgraph reppoDatabase ["`reppo-database`"]
+                    reppoDatabaseNote[("PostgreSQL")]:::noteStyle
+                end
+
+                subgraph reppoMigrate ["reppo-migrate"]
+                    reppoMigrateNote["`Kysely for schema migration in **reppo-database** service.`"]:::noteStyle
+                end
+
+                reppoMigrate --->|Schema| reppoDatabase
+                reppoApi --->|Read/Write| reppoDatabase
+            end
+        end
+
+        subgraph integrations ["Integrations"]
+           integrationsNote["`See **integrations** diagram.`"]:::noteStyle
+        end
+        reppoApi ---->|Calls| integrations
+        reppoDashboard ---->|Calls| integrations
+        reppoWebsite ---->|Calls| integrations
+
+        subgraph gcp ["GCP (Google Cloud Platform)"]
+        gcpNote["`See **deployment-cluster** diagram.`"]:::noteStyle
+        end
+        reppoInfrastructure ---->|Orchestrates|gcp
+    end
