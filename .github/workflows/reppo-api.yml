@@ -1,18 +1,18 @@
-# Force 9.
 name: reppo-api
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - 'main'
-      - 'hotfix'
-      - 'staging'
-      - 'staging-fixup'
-      - 'development'
-    paths:
-      - '.github/workflows/reppo-api.yml'
-      - 'services/reppo-api/**'
+  #  REMINDER: Disabled as this is example only!
+  #  push:
+  #    branches:
+  #      - 'main'
+  #      - 'hotfix'
+  #      - 'staging'
+  #      - 'staging-fixup'
+  #      - 'development'
+  #    paths:
+  #      - '.github/workflows/reppo-api.yml'
+  #      - 'services/reppo-api/**'
   pull_request:
     paths:
       - '.github/workflows/reppo-api.yml'

@@ -3,19 +3,20 @@ name: reppo-website
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - 'main'
-      - 'hotfix'
-      - 'staging'
-      - 'development'
-    paths:
-      - '.github/workflows/reppo-website.yml'
-      - 'services/reppo-website/**'
-  pull_request:
-    paths:
-      - '.github/workflows/reppo-website.yml'
-      - 'services/reppo-website/**'
+#  REMINDER: Disabled as this is example only!
+#  push:
+#    branches:
+#      - 'main'
+#      - 'hotfix'
+#      - 'staging'
+#      - 'development'
+#    paths:
+#      - '.github/workflows/reppo-website.yml'
+#      - 'services/reppo-website/**'
+#  pull_request:
+#    paths:
+#      - '.github/workflows/reppo-website.yml'
+#      - 'services/reppo-website/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}

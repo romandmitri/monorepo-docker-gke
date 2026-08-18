@@ -2,20 +2,21 @@ name: reppo-dashboard
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - 'main'
-      - 'hotfix'
-      - 'staging'
-      - 'staging-fixup'
-      - 'development'
-    paths:
-      - '.github/workflows/reppo-dashboard.yml'
-      - 'services/reppo-dashboard/**'
-  pull_request:
-    paths:
-      - '.github/workflows/reppo-dashboard.yml'
-      - 'services/reppo-dashboard/**'
+  #  REMINDER: Disabled as this is example only!
+  #  push:
+  #    branches:
+  #      - 'main'
+  #      - 'hotfix'
+  #      - 'staging'
+  #      - 'staging-fixup'
+  #      - 'development'
+#    paths:
+#      - '.github/workflows/reppo-dashboard.yml'
+#      - 'services/reppo-dashboard/**'
+#  pull_request:
+#    paths:
+#      - '.github/workflows/reppo-dashboard.yml'
+#      - 'services/reppo-dashboard/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}

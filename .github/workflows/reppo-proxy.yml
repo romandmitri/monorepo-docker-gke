@@ -2,15 +2,16 @@ name: reppo-proxy
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - 'main'
-      - 'hotfix'
-      - 'staging'
-      - 'development'
-    paths:
-      - '.github/workflows/reppo-proxy.yml'
-      - 'services/reppo-proxy/**'
+  #  REMINDER: Disabled as this is example only!
+  #  push:
+  #    branches:
+  #      - 'main'
+  #      - 'hotfix'
+  #      - 'staging'
+  #      - 'development'
+#    paths:
+#      - '.github/workflows/reppo-proxy.yml'
+#      - 'services/reppo-proxy/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}

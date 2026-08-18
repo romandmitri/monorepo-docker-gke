@@ -2,15 +2,16 @@ name: reppo-migrate
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - 'main'
-      - 'hotfix'
-      - 'staging'
-      - 'development'
-    paths:
-      - '.github/workflows/reppo-migrate.yml'
-      - 'services/reppo-migrate/**'
+#  REMINDER: Disabled as this is example only!
+#  push:
+#    branches:
+#      - 'main'
+#      - 'hotfix'
+#      - 'staging'
+#      - 'development'
+#    paths:
+#      - '.github/workflows/reppo-migrate.yml'
+#      - 'services/reppo-migrate/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}

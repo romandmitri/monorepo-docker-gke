@@ -1,11 +1,13 @@
 name: version
 
 on:
-  push:
-    branches:
-      - 'main'
-    tags-ignore:
-      - '**'
+  workflow_dispatch:
+#  REMINDER: Disabled as this is example only!
+#  push:
+#    branches:
+#      - 'main'
+#    tags-ignore:
+#      - '**'
 
 concurrency:
   group: ${{ github.workflow }}
