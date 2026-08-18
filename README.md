@@ -64,7 +64,7 @@ REPPO_API_NGROK_DOMAIN=NAME.ngrok.io
 make local-boot
 ```
 
-The project should start on `http://localhost:2400` address.
+The project should start on `http://localhost:2000` address.
 
 > If project does NOT start, see [local-troubleshooting.md](/docs/local-troubleshooting.md) file.
 
