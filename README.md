@@ -6,17 +6,36 @@
 
 ## Preface
 
-Hi, my name is Roman Eidenzon (aka Roman Dmitri) and you are most likely looking at this to evaluate if I am a good hire, so the purpose of this repository is
-to showcase my skills as an experienced architect and full-stack web developer. Specifically, this one will focus on monorepo structure, local development (via
-Docker) and GCP orchestration via Terraform. This is a typical structure example and NOT a real project. Checkout
-my [introduction](https://github.com/romandmitri/introduction) repository for global overview.
+Hi, my name is **Roman Eidenzon** (aka **Roman Dmitri**). This repository showcases my capabilities as an experienced **Architect, Full Stack Developer, and
+Infrastructure Specialist**.
 
-The highlights include:
+It demonstrates a production grade microservice monorepo built for **frictionless developer onboarding**, **local to cloud parity**, **modular Infrastructure as
+Code (IaC)**, and **automated GitOps pipelines**.
 
-* Extremely simple setup/startup for local development. See [Boot](#boot) section.
-* Google Cloud Platform (GCP) infrastructure provision via Terraform. See [services/reppo-infrastructure](/services/reppo-infrastructure) folder.
-* CI/CD pipeline and automatic tests via GitHub Actions workflows. See [.github](/.github) folder.
-* Documentation and diagrams. See [docs](/docs) folder.
+Instead of heavy monorepo frameworks, orchestration is handled by **Makefile** targets and modular **Bash** scripts, delivering a fast, lightweight developer
+experience across Linux and macOS.
+
+See my [introduction](https://github.com/romandmitri/introduction) repository for career overview.
+
+### Highlights
+
+* **Developer Experience**: Run `make local-boot` for automated container builds, secret loading, migrations, and mock data seeding. See [Boot](#boot).
+* **Local Ingress**: Nginx proxy ([services/reppo-proxy](/services/reppo-proxy)) serves all microservices via `http://localhost:2000`, matching GKE Ingress and
+  eliminating CORS issues.
+* **GCP Infrastructure via Terraform**: Multi project setup covering GKE, Cloud SQL, Secret Manager, BigQuery, and Cloud Storage.
+  See [services/reppo-infrastructure](/services/reppo-infrastructure).
+* **Containerized Tooling**: Prebuilt container with Terraform, `gcloud`, and `kubectl` ensures reproducible environment management.
+* **Full Stack Architecture**:
+    * **Core API** ([services/reppo-api](/services/reppo-api)): Fastify and TypeScript with dual HTTP and CLI execution, request tracing, and AI or third party
+      adapters.
+    * **Dashboard** ([services/reppo-dashboard](/services/reppo-dashboard)): React and Vite with Shadcn UI and type safe form validation.
+    * **Website** ([services/reppo-website](/services/reppo-website)): Next.js with App Router and Tailwind CSS.
+    * **Migrations** ([services/reppo-migrate](/services/reppo-migrate)): PostgreSQL schema management using Kysely.
+* **CI/CD Pipelines**: Path filtered GitHub Actions workflows for tests, Artifact Registry image builds, and automated Kubernetes secret injection.
+  See [.github](/.github).
+* **Architecture Docs**: Visual diagrams
+  for [Local Topology](/docs/diagrams/deployment-local.mermaid), [GKE Cluster](/docs/diagrams/deployment-cluster.mermaid),
+  and [Async Flows](/docs/diagrams/flow-socket-queue.mermaid). See [docs](/docs).
 
 ### Videos
 
