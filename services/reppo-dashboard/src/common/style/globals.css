@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@import "@/src/common/style/theme.css";
+
+/*
+https://streamdown.ai/
+https://streamdown.ai/docs/styling
+ */
+@source "../../../node_modules/streamdown/dist/index.js";

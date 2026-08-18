@@ -1,0 +1,25 @@
+{
+	"name": "reppo-website",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"dev": "next dev -p 2000",
+		"build": "next build",
+		"start": "next start"
+	},
+	"dependencies": {
+		"next": "16.3.1",
+		"react": "19.2.8",
+		"react-dom": "19.2.8"
+	},
+	"devDependencies": {
+		"@tailwindcss/postcss": "4.3.3",
+		"@types/node": "26.2.0",
+		"@types/react": "19.2.18",
+		"@types/react-dom": "19.2.4",
+		"prettier": "3.9.6",
+		"prettier-plugin-tailwindcss": "0.8.1",
+		"tailwindcss": "4.3.3",
+		"typescript": "7.0.2"
+	}
+}

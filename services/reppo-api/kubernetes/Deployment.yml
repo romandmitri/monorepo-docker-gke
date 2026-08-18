@@ -1,0 +1,58 @@
+# https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/deployment-v1/
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reppo-api
+spec:
+  replicas: @REPLICAS
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: reppo-api
+  template:
+    metadata:
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+      labels:
+        app: reppo-api
+    spec:
+      containers:
+        - name: reppo-api
+          image: @IMAGE
+          # TODO: reidenzon - Use a different package, custom log serialization/transport?!
+          # Using [--no-deprecation] flag to avoid warnings from @google-cloud/pino-logging-gcp-config package.
+          command: [ "node", "--no-deprecation", "/src/dist/index.js", "api" ]
+          envFrom:
+            - secretRef:
+                name: reppo-api
+          lifecycle:
+            preStop:
+              exec:
+                command: [ "/bin/sh", "-c", "sleep 30" ]
+          ports:
+            - name: http
+              containerPort: 80
+          readinessProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            httpGet:
+              path: /api
+              port: http
+          resources:
+            requests:
+              cpu: @REQUEST_CPU
+              ephemeral-storage: "512Mi"
+              memory: @REQUEST_MEMORY
+          volumeMounts:
+            - name: reppo-api-google-credentials
+              mountPath: /src/.env.REPPO_API_GOOGLE_CREDENTIALS.json
+              subPath: .env.REPPO_API_GOOGLE_CREDENTIALS.json
+              readOnly: true
+      terminationGracePeriodSeconds: 300 # 5 minutes
+      volumes:
+        - name: reppo-api-google-credentials
+          secret:
+            secretName: reppo-api-google-credentials
+            items:
+              - key: reppo-api-google-credentials.json
+                path: .env.REPPO_API_GOOGLE_CREDENTIALS.json

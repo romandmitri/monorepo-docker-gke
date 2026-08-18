@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>reppo-proxy</title>
+	<meta charset="UTF-8">
+	<link href="favicon.png" rel="icon" type="image/x-icon">
+	<meta content="width=device-width, initial-scale=1" name="viewport"/>
+	<link href="https://fonts.googleapis.com/css?display=swap&family=Roboto%20Condensed:wght@100,200,300;400;500;600;700;800;900" rel="stylesheet">
+	<link href="style.css" rel="stylesheet"/>
+	<script src="index.js" type="application/javascript"></script>
+</head>
+<body>
+<h1>reppo-proxy</h1>
+<div id="root"></div>
+<script>
+	new ServiceListComponent({
+		target: document.getElementById("root"),
+		services: [
+			new ServiceEntity({name: "reppo-api", url: "/api"}),
+			new ServiceEntity({name: "reppo-dashboard", url: "/dashboard"}),
+			new ServiceEntity({name: "reppo-website", url: "/website"}),
+		],
+	})
+</script>
+</body>
+</html>

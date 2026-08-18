@@ -1,0 +1,31 @@
+services:
+
+  reppo-database:
+    build:
+      dockerfile: Dockerfile.local
+    command: [ "postgres", "-c", "config_file=/etc/postgresql/postgresql.conf" ]
+    container_name: reppo-database
+    environment:
+      # https://hub.docker.com/_/postgres
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    networks:
+      - reppo
+    ports:
+      - target: 5432
+        published: 2032
+    volumes:
+      - type: bind
+        consistency: consistent
+        source: ./postgresql/postgresql.conf
+        target: /etc/postgresql/postgresql.conf
+      - type: bind
+        consistency: consistent
+        source: .
+        target: /src
+      - type: bind
+        consistency: consistent
+        source: ../../scripts/common
+        target: /src/scripts/common
+    working_dir: /src

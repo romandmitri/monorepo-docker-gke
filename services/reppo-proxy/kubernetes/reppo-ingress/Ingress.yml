@@ -1,0 +1,39 @@
+# https://kubernetes.io/docs/concepts/services-networking/ingress/
+# https://kubernetes.io/docs/reference/kubernetes-api/service-resources/ingress-v1/
+# https://cloud.google.com/kubernetes-engine/docs/tutorials/http-balancer
+# https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#ingress-v1beta1-networking-k8s-io
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: reppo-ingress
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    # https://cloud.google.com/kubernetes-engine/docs/concepts/ingress-xlb#disabling_http
+    kubernetes.io/ingress.allow-http: "true"
+    # https://cloud.google.com/kubernetes-engine/docs/concepts/ingress-xlb#static_ip_addresses_for_https_load_balancers
+    kubernetes.io/ingress.global-static-ip-name: "kubernetes-global-ip"
+    networking.gke.io/v1beta1.FrontendConfig: reppo-frontend-config
+    networking.gke.io/managed-certificates: reppo-certificate
+spec:
+  defaultBackend:
+    service:
+      name: reppo-website
+      port:
+        number: 80
+  rules:
+    - http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: reppo-api
+                port:
+                  number: 80
+          - path: /dashboard
+            pathType: Prefix
+            backend:
+              service:
+                name: reppo-dashboard
+                port:
+                  number: 80

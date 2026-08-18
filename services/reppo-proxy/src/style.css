@@ -1,0 +1,103 @@
+* {
+	box-sizing: border-box;
+}
+
+body {
+	color: #000;
+	font-family: monospace;
+	font-weight: normal;
+	font-size: 14px;
+}
+
+h1 {
+	font-size: 28px;
+}
+
+h2 {
+	font-size: 21px;
+}
+
+h3 {
+	font-size: 17px;
+}
+
+ul {
+	padding: 0;
+	margin: 0;
+}
+
+li {
+
+}
+
+a {
+	color: #1794ff;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #1794ff;
+	text-decoration: underline;
+}
+
+dl {
+	background: rgba(0, 0, 0, .05);
+	display: inline-block;
+	padding: 10px;
+}
+
+dt {
+	position: relative;
+}
+
+dt:hover {
+	background: rgba(0, 0, 0, .2);
+	cursor: pointer;
+}
+
+dt:hover::after {
+	display: block;
+	position: absolute;
+
+	top: 50%;
+	left: calc(100% + 20px);
+	transform: translate(0, -50%);
+
+	opacity: 0.5;
+	content: 'copy';
+	font-size: 10px;
+}
+
+/* Service. */
+
+li.service {
+	border-top: 1px solid #DDD;
+	list-style-type: none;
+	margin: 10px 0;
+	padding: 0;
+}
+
+li.service h2 {
+	display: flex;
+	flex-direction: row;
+	gap: .5em;
+}
+
+
+/* Status. */
+
+div.status {
+	background: rgba(0, 0, 0, .05);
+	font-size: .6em;
+	font-weight: 700;
+	padding: 5px 10px;
+	text-transform: uppercase;
+}
+
+div.status.isOk {
+	color: #0A0;
+}
+
+div.status.isError {
+	color: #D00;
+}

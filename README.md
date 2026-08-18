@@ -18,6 +18,13 @@ The highlights include:
 * CI/CD pipeline and automatic tests via GitHub Actions workflows. See [.github](/.github) folder.
 * Documentation and diagrams. See [docs](/docs) folder.
 
+### Videos
+
+Checkout the [Monorepo](https://www.youtube.com/playlist?list=PL7OhwvHtVH5J3-Pc0NV8vuOwBr_Q09vpp) playlist on my YouTube
+channel [@cheese-code](http://youtube.com/@cheese-code) if you prefer a more-visual experience.
+
+* Skip the jokes and jump ahead to the [Discussion](https://youtu.be/1dLHlG8yOrc?t=70&si=P8ovmiFDCPDDwCW5) chapter which covers the folder structure.
+
 ### Context
 
 Let's pretend this is a project for a company named `Cheese Industries Inc.` and the internal prefix/codename is `REPPO` which means `repo` (repository). This

@@ -1,0 +1,1 @@
+export type TwilioMessageSid = string;

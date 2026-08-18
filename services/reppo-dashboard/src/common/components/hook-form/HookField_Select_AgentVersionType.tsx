@@ -1,0 +1,32 @@
+import { HookField } from "@/src/common/components/hook-form/field/HookField.tsx";
+import { HookFieldName } from "@/src/common/components/hook-form/field/HookFieldName.ts";
+import { setValueConfig } from "@/src/common/components/hook-form/form/HookFormHelper.tsx";
+import { AgentVersionTypeSelect } from "@/src/modules/agent-version/components/AgentVersionTypeSelect.tsx";
+import { AgentVersionType } from "@/src/modules/agent-version/type/AgentVersionType.ts";
+import { AgentId } from "@/src/modules/agent/type/AgentId.ts";
+import { ReactNode } from "react";
+import { useFormContext } from "react-hook-form";
+
+interface Props {
+	agentId: AgentId;
+	label?: ReactNode;
+	description?: ReactNode;
+	isDisabled?: boolean;
+	name: HookFieldName;
+}
+
+export const HookField_Select_AgentVersionType = (p: Props) => {
+	const methods = useFormContext();
+	const agentVersionType = methods.watch(p.name) as AgentVersionType;
+
+	return (
+		<HookField label={p.label} description={p.description} name={p.name}>
+			<AgentVersionTypeSelect
+				agentId={p.agentId}
+				agentVersionType={agentVersionType ?? null}
+				isDisabled={p.isDisabled}
+				onChange={(v) => methods.setValue(p.name, v, setValueConfig)}
+			/>
+		</HookField>
+	);
+};

@@ -1,0 +1,110 @@
+import { cn } from "@/src/common/components/shadcn/_/cn.ts";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/src/common/components/shadcn/tooltip.tsx";
+import { withHtml } from "@/src/common/utility/http/Raw.tsx";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react"; // https://ui.shadcn.com/docs/components/button
+
+// https://ui.shadcn.com/docs/components/button
+
+const buttonVariants = cva(
+	"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive cursor-pointer",
+	{
+		variants: {
+			variant: {
+				default: "bg-primary text-primary-foreground hover:bg-primary/90",
+				destructive:
+					"bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+				outline:
+					"text-primary border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+				secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+				ghost: "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+				// Custom...
+				"destructive-ghost":
+					"text-destructive hover:text-white hover:bg-destructive/50 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
+				"warning-ghost": "text-warning hover:text-white hover:bg-warning/50 focus-visible:ring-warning/20 dark:focus-visible:ring-warning/40",
+				warning: "bg-warning text-white hover:bg-warning/90 focus-visible:ring-warning/20 dark:focus-visible:ring-warning/40 dark:bg-warning/60",
+				positive: "bg-positive text-white hover:bg-positive/90 focus-visible:ring-positive/20 dark:focus-visible:ring-positive/40 dark:bg-positive/60",
+				link: "text-inherit underline-offset-4 hover:underline",
+				"link-developer": "text-developer underline-offset-4 hover:underline",
+				sidebar:
+					"peer/menu-button flex w-full justify-start gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-hidden ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 h-8",
+				developer:
+					"bg-developer text-white hover:bg-developer/90 focus-visible:ring-developer/20 dark:focus-visible:ring-developer/40 dark:bg-developer/60",
+				"outline-destructive":
+					"text-destructive border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-destructive dark:hover:bg-input/50",
+				"outline-developer":
+					"text-developer border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-developer dark:hover:bg-input/50",
+				root: "text-root",
+			},
+			size: {
+				default: "h-9 px-4 py-2 has-[>svg]:px-3",
+				xs: "h-6 rounded-md gap-1 px-2 has-[>svg]:px-1.5",
+				sm: "h-7 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
+				lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
+				blank: "",
+				"link-xs": "text-xs",
+				"link-sm": "text-sm",
+				full: "h-8 px-4 w-full justify-between",
+				icon: "size-9",
+				"icon-xs": "size-6 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3",
+				"icon-sm": "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
+			},
+		},
+		defaultVariants: {
+			variant: "default",
+			size: "default",
+		},
+	},
+);
+
+function Button({
+	className,
+	disabled,
+	isLoading,
+	variant,
+	size,
+	tooltip,
+	tooltipHtml,
+	asChild = false,
+	...props
+}: React.ComponentProps<"button"> &
+	VariantProps<typeof buttonVariants> & {
+		asChild?: boolean;
+		isLoading?: boolean;
+		/** @deprecated Use {@link tooltipHtml} instead. */
+		tooltip?: string | React.ComponentProps<typeof TooltipContent>;
+		tooltipHtml?: string;
+	}) {
+	const Comp = asChild ? Slot : "button";
+	const isDisabled = disabled || isLoading;
+
+	let content = (
+		<Comp
+			//
+			data-slot="button"
+			className={cn(buttonVariants({ variant, size, className }))}
+			type={"button"}
+			disabled={isDisabled}
+			{...props}
+		/>
+	);
+
+	if (tooltipHtml) tooltip = { children: withHtml(tooltipHtml) };
+	if (tooltip) {
+		if (typeof tooltip == "string") tooltip = { children: tooltip };
+		content = (
+			<Tooltip>
+				<TooltipTrigger asChild>{content}</TooltipTrigger>
+				<TooltipContent side="top" align="center" {...tooltip} />
+			</Tooltip>
+		);
+	}
+
+	// TODO: reidenzon - Roll this! ...but Shimmer requires "string" children :(
+	// if (isLoading) content = <Shimmer duration={1.5}>{content}</Shimmer>
+
+	return content;
+}
+
+export { Button, buttonVariants as buttonVariants };

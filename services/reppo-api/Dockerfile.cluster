@@ -1,0 +1,39 @@
+# https://hub.docker.com/_/node
+FROM node:24.7.0-alpine AS builder
+
+# https://nodejs.org/api/cli.html#--max-old-space-sizesize-in-mib
+ENV NODE_OPTIONS="--max-old-space-size=6144"
+ENV PATH=/src/node_modules/.bin:$PATH
+
+# https://pnpm.io/installation#using-npm
+RUN npm install -g pnpm@^10.16.0
+
+WORKDIR /src
+
+COPY . /src
+
+# TODO: reidenzon - Just use npm in the cluster?! Simplify some things...
+RUN pnpm config set store-dir /src/pnpm --global
+RUN pnpm install --frozen-lockfile
+RUN pnpm run server-build
+
+# TODO: reidenzon - Any smaller image available?!
+# https://hub.docker.com/_/node
+FROM node:24.7.0-alpine
+
+RUN apk --no-cache add \
+	bash \
+	htop \
+	less \
+	postgresql-client \
+	tree
+
+WORKDIR /src
+
+COPY --from=builder /src/data /src/data
+COPY --from=builder /src/dist /src/dist
+COPY --from=builder /src/node_modules /src/node_modules
+COPY --from=builder /src/pnpm /src/pnpm
+COPY --from=builder /src/scripts /src/scripts
+COPY --from=builder /src/.env.github /src/.env.github
+COPY --from=builder /src/package.json /src/package.json

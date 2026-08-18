@@ -1,0 +1,44 @@
+# https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/deployment-v1/
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reppo-website
+spec:
+  replicas: @REPLICAS
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: reppo-website
+  template:
+    metadata:
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+      labels:
+        app: reppo-website
+    spec:
+      containers:
+        - name: reppo-website
+          image: @IMAGE
+          command: [ "npm", "run", "server-run" ]
+          envFrom:
+            - secretRef:
+                name: reppo-website
+          lifecycle:
+            preStop:
+              exec:
+                command: [ "/bin/sh", "-c", "sleep 30" ]
+          ports:
+            - name: http
+              containerPort: 80
+          readinessProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            httpGet:
+              path: /
+              port: http
+          resources:
+            requests:
+              cpu: "500m"
+              ephemeral-storage: "100Mi"
+              memory: "512Mi"
+      terminationGracePeriodSeconds: 300 # 5 minutes

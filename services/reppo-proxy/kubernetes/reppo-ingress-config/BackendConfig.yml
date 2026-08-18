@@ -1,0 +1,14 @@
+# https://cloud.google.com/kubernetes-engine/docs/concepts/ingress#health_checks
+# https://cloud.google.com/kubernetes-engine/docs/how-to/ingress-features#direct_health
+# https://cloud.google.com/load-balancing/docs/health-check-concepts
+# https://cloud.google.com/kubernetes-engine/docs/how-to/ingress-features#associating_backendconfig_with_your_ingress
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: reppo-backend-config
+spec:
+  # TODO: reidenzon - Enable the health checks.
+  #  healthCheck:
+  #    checkIntervalSec: 60
+  #    requestPath: /probe/ingress
+  timeoutSec: 86400 # 24h (max, for sockets)

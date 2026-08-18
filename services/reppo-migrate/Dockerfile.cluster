@@ -1,0 +1,16 @@
+# https://hub.docker.com/_/node
+FROM node:24.7.0-alpine AS builder
+
+ENV PATH=/src/node_modules/.bin:$PATH
+
+# https://pnpm.io/installation#using-npm
+RUN npm install -g pnpm@^10.16.0
+
+RUN apk --no-cache add \
+	bash
+
+WORKDIR /src
+
+COPY . /src
+
+RUN pnpm install --frozen-lockfile

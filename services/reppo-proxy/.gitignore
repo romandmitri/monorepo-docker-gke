@@ -1,0 +1,7 @@
+.DS_Store
+!.gitkeep
+.idea
+.vsls.json
+.vscode
+
+/*.env*

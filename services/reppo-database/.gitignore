@@ -1,0 +1,11 @@
+.DS_Store
+.idea
+.vsls.json
+.vscode
+
+/.cache
+/tmp/*
+!/tmp/.gitkeep
+
+.pnpm-store
+/.env*

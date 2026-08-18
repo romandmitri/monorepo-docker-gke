@@ -47,7 +47,7 @@ jobs:
         with:
           cluster_name: 'cluster'
           location: "us-east4"
-      - run: $SCRIPTS/kubectl-replace.sh --resource="kubernetes/reppo-ingress-config" --key="@INGRESS_CERT_DOMAIN" --value="cheese-dev.app"
+      - run: $SCRIPTS/kubectl-replace.sh --resource="kubernetes/reppo-ingress-config" --key="@INGRESS_CERT_DOMAIN" --value="reppo-dev.cheeseindustries.ca"
       - run: $SCRIPTS/kubectl-apply.sh --resource="kubernetes/reppo-ingress-config"
       - run: $SCRIPTS/kubectl-apply.sh --resource="kubernetes/reppo-ingress"
 

@@ -1,0 +1,16 @@
+.DS_Store
+!.gitkeep
+.idea
+.vsls.json
+.vscode
+
+.pnpm-store
+bin/*
+!bin/.gitkeep
+build/*
+dist/
+node_modules/
+pnpm/
+yarn/
+
+/.env*

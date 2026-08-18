@@ -1,0 +1,21 @@
+# https://hub.docker.com/_/nginx
+FROM nginx:1.27.4-alpine
+
+RUN apk --no-cache add \
+	bash \
+	htop \
+	shadow \
+	tree
+
+## https://vsupalov.com/docker-shared-permissions/
+ARG OWNER_USER=0
+ARG OWNER_GROUP=0
+RUN addgroup -S -g $OWNER_GROUP user
+RUN adduser -S -u $OWNER_USER -G user user
+
+RUN chown -R $OWNER_USER:$OWNER_GROUP /var/cache/nginx
+RUN chown -R $OWNER_USER:$OWNER_GROUP /var/run
+RUN chown -R $OWNER_USER:$OWNER_GROUP /var/log/nginx
+
+# TODO: reidenzon - Do NOT call until /var/lib/postresql/data permissions are fixed.
+#USER user

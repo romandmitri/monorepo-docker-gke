@@ -1,0 +1,36 @@
+// https://www.typescriptlang.org/tsconfig
+{
+	"compilerOptions": {
+		"allowJs": true,
+		"alwaysStrict": true,
+		"baseUrl": ".",
+		"esModuleInterop": true,
+		"incremental": true,
+		//		"isolatedModules": true,
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"noEmit": true,
+		"noImplicitAny": true,
+		"noImplicitThis": true,
+		"noUnusedLocals": false,
+		//		"outDir": "./dist/",
+		"paths": {
+			"@/*": [
+				"./*"
+			]
+		},
+		"resolveJsonModule": true,
+		"skipLibCheck": true,
+		// https://kysely.dev/docs/getting-started#prerequisites
+		"strict": true,
+		"strictNullChecks": true,
+		"target": "ES2024"
+	},
+	"exclude": [
+		"node_modules",
+		"pnpm"
+	],
+	"include": [
+		"./**/*"
+	]
+}

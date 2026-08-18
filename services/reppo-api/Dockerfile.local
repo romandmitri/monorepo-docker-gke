@@ -1,0 +1,30 @@
+# https://hub.docker.com/_/node
+FROM node:24.7.0
+
+# https://nodejs.org/api/cli.html#--max-old-space-sizesize-in-mib
+# https://stackoverflow.com/questions/67903114/javascript-heap-out-of-memory-in-docker-image-run
+# https://github.com/angular/angular-cli/issues/12645#issuecomment-431323670
+ENV NODE_OPTIONS="--max-old-space-size=8192"
+
+RUN apt-get update && \
+	apt-get install -y bash htop less nano tree
+
+ENV PATH=/src/node_modules/.bin:$PATH
+
+# https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md#non-root-user
+RUN groupmod -g 999 node && usermod -u 999 -g 999 node
+
+# https://pnpm.io/installation#using-npm
+RUN npm install -g pnpm@^10.16.0
+
+# bash
+# https://vsupalov.com/docker-shared-permissions/
+ARG OWNER_USER=0
+ARG OWNER_GROUP=0
+RUN addgroup --gid $OWNER_GROUP user
+RUN adduser --disabled-password --gecos '' --uid $OWNER_USER --gid $OWNER_GROUP user
+USER user
+
+# TODO: reidenzon - Figure out yargs bash completion!
+# https://www.kevinloughead.com/blog/yargs-autocompletion/
+#RUN echo "pnpm local-cli completion" >> ~/.bashrc

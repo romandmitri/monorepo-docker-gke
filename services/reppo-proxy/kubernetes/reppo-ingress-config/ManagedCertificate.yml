@@ -1,0 +1,8 @@
+# https://cloud.google.com/kubernetes-engine/docs/how-to/managed-certs
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: reppo-certificate
+spec:
+  domains:
+    - @INGRESS_CERT_DOMAIN

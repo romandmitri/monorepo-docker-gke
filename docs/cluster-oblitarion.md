@@ -40,7 +40,7 @@ https://github.com/romandmitri/reppo/actions/workflows/reppo-migrate.yml
 ### Import
 
 Import data using `reppo-api` in CLI mode. The data lives in the Google Drive:  
-https://drive.google.com/drive/folders/1KPwk458tX_thLLlwYUGRTBYM4lWbjxUu
+https://drive.google.com/drive/folders/1KPwk458tX_thLLlwYUGRTBYM4lW_fake
 
 Connect (via `bash`) into the `reppo-api` container in `staging` cluster.
 

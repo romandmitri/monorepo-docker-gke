@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: reppo-dashboard
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+  selector:
+    app: reppo-dashboard
+  # https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
+  type: NodePort

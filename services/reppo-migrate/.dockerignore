@@ -1,0 +1,6 @@
+# https://docs.docker.com/engine/reference/builder/#dockerignore-file
+bin
+dist
+node_modules
+pnpm
+yarn

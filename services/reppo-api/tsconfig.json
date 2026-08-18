@@ -1,0 +1,32 @@
+// https://www.typescriptlang.org/tsconfig
+{
+	"compilerOptions": {
+		"baseUrl": ".",
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"incremental": true,
+		"jsx": "react-jsx",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"noImplicitAny": true,
+		"noImplicitThis": true,
+		"outDir": "./dist",
+		//		"resolveJsonModule": true,
+		"rootDir": "./src",
+		"skipLibCheck": true,
+		"strict": true,
+		"target": "ES2024",
+		"paths": {
+			"@/*": [
+				"./*"
+			]
+		}
+	},
+	"exclude": [
+		"node_modules",
+		"pnpm"
+	],
+	"include": [
+		"src/**/*"
+	]
+}

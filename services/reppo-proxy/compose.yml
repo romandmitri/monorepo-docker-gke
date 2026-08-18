@@ -1,0 +1,30 @@
+services:
+
+  reppo-proxy:
+    build:
+      dockerfile: Dockerfile.local
+    container_name: reppo-proxy
+    env_file:
+      - .env
+      - .env.local
+    networks:
+      - reppo
+    ports:
+      - target: 80
+        published: 2000
+    volumes:
+      - type: bind
+        consistency: consistent
+        read_only: true
+        source: ./nginx/local/default.conf.template
+        target: /etc/nginx/templates/default.conf.template
+      - type: bind
+        consistency: consistent
+        read_only: true
+        source: ./nginx/local/nginx.conf
+        target: /etc/nginx/nginx.conf
+      - type: bind
+        consistency: consistent
+        source: .
+        target: /src
+    working_dir: /src

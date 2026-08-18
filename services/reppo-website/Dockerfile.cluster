@@ -1,0 +1,29 @@
+# https://hub.docker.com/_/node
+FROM node:24.7.0-alpine AS builder
+
+ENV PATH=/src/node_modules/.bin:$PATH
+
+# https://pnpm.io/installation#using-npm
+RUN npm install -g pnpm@^10.16.0
+
+WORKDIR /src
+
+COPY . /src
+
+RUN pnpm install --frozen-lockfile
+RUN pnpm run server-build
+
+# https://hub.docker.com/_/node
+FROM node:24.7.0-alpine
+
+WORKDIR /src
+
+# TODO: reidenzon - Optimize, see Next.js output:standalone mode.
+COPY --from=builder /src/node_modules /src/node_modules
+COPY --from=builder /src/.next /src/.next
+COPY --from=builder /src/public /src/public
+COPY --from=builder /src/package.json /src/package.json
+# REMINDER: Do NOT need to copy .env as the [NEXT_PUBLIC_] values will be injected during build process (above).
+#COPY --from=builder /src/.env /src/.env
+COPY --from=builder /src/.env.github /src/.env.github
+COPY --from=builder /src/next.config.ts /src/next.config.ts

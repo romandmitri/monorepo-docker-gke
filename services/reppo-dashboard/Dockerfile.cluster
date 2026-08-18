@@ -1,0 +1,25 @@
+# https://hub.docker.com/_/node
+FROM node:24.7.0-alpine AS builder
+
+ENV PATH=/src/node_modules/.bin:$PATH
+
+# https://pnpm.io/installation#using-npm
+RUN npm install -g pnpm@^10.16.0
+
+WORKDIR /src
+
+COPY . /src
+
+RUN pnpm install --frozen-lockfile
+RUN pnpm run server-build
+
+# https://hub.docker.com/_/node
+FROM node:24.7.0-alpine
+
+WORKDIR /src
+
+COPY --from=builder /src/node_modules /src/node_modules
+COPY --from=builder /src/dist /src/dist
+COPY --from=builder /src/server/express /src/server/express
+COPY --from=builder /src/.env.github /src/.env.github
+COPY --from=builder /src/package.json /src/package.json

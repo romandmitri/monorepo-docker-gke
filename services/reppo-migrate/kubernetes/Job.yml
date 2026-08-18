@@ -1,0 +1,20 @@
+# https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/job-v1/
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: reppo-migrate
+spec:
+  completions: 1
+  # https://kubernetes.io/docs/concepts/workloads/controllers/job/#ttl-mechanism-for-finished-jobs
+  ttlSecondsAfterFinished: 1800
+  template:
+    spec:
+      # https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#Container
+      containers:
+        - name: reppo-migrate
+          image: @IMAGE
+          command: [ "/bin/bash", "-c", "/src/scripts/cluster-migrate.sh" ]
+          envFrom:
+            - secretRef:
+                name: reppo-migrate
+      restartPolicy: Never

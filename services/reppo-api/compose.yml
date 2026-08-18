@@ -1,0 +1,21 @@
+services:
+  reppo-api:
+    build:
+      dockerfile: Dockerfile.local
+    command: pnpm run local-api
+    container_name: reppo-api
+    networks:
+      - reppo
+    ports:
+      - target: 80
+        published: 2010
+    volumes:
+      - type: bind
+        consistency: consistent
+        source: .
+        target: /src
+      - type: bind
+        consistency: consistent
+        source: ../../scripts/common
+        target: /src/scripts/common
+    working_dir: /src

@@ -1,0 +1,23 @@
+services:
+  reppo-dashboard:
+    build:
+      dockerfile: Dockerfile.local
+    command: pnpm run local-serve
+    container_name: reppo-dashboard
+    networks:
+      - reppo
+    ports:
+      - target: 80
+        published: 2020
+    # Do TTY to convince vite to log in color on local.
+    tty: true
+    volumes:
+      - type: bind
+        consistency: consistent
+        source: .
+        target: /src
+      - type: bind
+        consistency: consistent
+        source: ../../scripts/common
+        target: /src/scripts/common
+    working_dir: /src

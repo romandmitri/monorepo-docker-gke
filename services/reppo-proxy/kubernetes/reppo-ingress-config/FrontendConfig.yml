@@ -1,0 +1,8 @@
+# https://cloud.google.com/kubernetes-engine/docs/how-to/ingress-features#https_redirect
+apiVersion: networking.gke.io/v1beta1
+kind: FrontendConfig
+metadata:
+  name: reppo-frontend-config
+spec:
+  redirectToHttps:
+    enabled: true

@@ -1,0 +1,15 @@
+# https://hub.docker.com/_/postgres
+FROM postgres:17.6-alpine3.22
+
+RUN apk --no-cache add \
+	bash \
+	htop \
+	tree
+
+## https://vsupalov.com/docker-shared-permissions/
+#ARG OWNER_USER=0
+#ARG OWNER_GROUP=0
+#RUN addgroup -g $OWNER_GROUP user
+#RUN adduser -g '' -u $OWNER_USER -S user -G user
+# TODO: reidenzon - Do NOT call until /var/lib/postresql/data permissions are fixed.
+#USER user

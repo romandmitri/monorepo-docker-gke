@@ -1,0 +1,47 @@
+# https://hub.docker.com/_/alpine
+FROM --platform=linux/amd64 alpine:3.22.1
+
+RUN apk --no-cache add \
+	ack \
+	bash \
+	curl \
+	htop \
+	jq \
+	make \
+	nano \
+	python3 \
+	shadow \
+	tree \
+	util-linux
+
+# https://hub.docker.com/r/odiso/gcloud-terraform/dockerfile
+# https://cloud.google.com/sdk/docs/install
+
+ARG CLOUD_SDK_VERSION=536.0.1
+ENV PATH=/google-cloud-sdk/bin:$PATH
+
+RUN curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
+	tar xzf google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
+	rm google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
+	gcloud --version && \
+	gcloud components list && \
+	gcloud components install kubectl && \
+	gcloud components install gke-gcloud-auth-plugin
+
+ARG TERRAFORM_VERSION=1.13.1
+RUN curl -O https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
+	unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
+	rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
+	mv terraform /usr/bin/terraform
+
+RUN gcloud components list && \
+	gke-gcloud-auth-plugin --version
+
+ENV USE_GKE_GCLOUD_AUTH_PLUGIN=true
+
+# https://vsupalov.com/docker-shared-permissions/
+ARG OWNER_USER=0
+ARG OWNER_GROUP=0
+RUN addgroup -g $OWNER_GROUP user
+RUN adduser -g '' -u $OWNER_USER -S user -G user
+USER user

@@ -1,0 +1,49 @@
+// https://www.typescriptlang.org/tsconfig
+{
+	"compilerOptions": {
+		"allowImportingTsExtensions": true,
+		"baseUrl": ".",
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"jsx": "react-jsx",
+		"incremental": true,
+		"isolatedModules": true,
+		"lib": [
+			"ES2020",
+			"DOM",
+			"DOM.Iterable"
+		],
+		"module": "ES2020",
+		"moduleResolution": "bundler",
+		//		"moduleResolution": "node",
+		"noEmit": true,
+		"noImplicitAny": true,
+		"noImplicitThis": true,
+		"outDir": "./dist",
+		"paths": {
+			"@/*": [
+				"./*"
+			]
+		},
+		"resolveJsonModule": true,
+		"rootDir": "./",
+		"skipLibCheck": true,
+		"strict": true,
+		"target": "ES2020",
+		"types": [
+			"node",
+			"vite/client",
+			"vitest/globals"
+			// "happy-dom",
+			// "jsdom",
+		]
+	},
+	"exclude": [
+		"node_modules",
+		"pnpm"
+	],
+	"include": [
+		"src/**/*",
+		"vite.config.ts"
+	]
+}
