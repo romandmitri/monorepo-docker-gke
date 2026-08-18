@@ -1,5 +1,9 @@
 # Branching Strategy
 
+> This is just an example! More complex strategies are also possible depending on complexity of the project and team size.
+
+This strategy uses `rebase` and the target `VERSION` number is know BEFORE release to production.
+
 ## Reserved Branches
 
 ### `main`

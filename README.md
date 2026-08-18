@@ -6,7 +6,7 @@
 
 ## Preface
 
-Hi, my name is **Roman Eidenzon** (aka **Roman Dmitri**). This repository showcases my capabilities as an experienced **Architect, Full Stack Developer, and
+Hi, my name is **Roman Eidenzon** (aka **Roman Dmitri**). This repository showcases my abilities as an experienced **Architect, Full Stack Developer, and
 Infrastructure Specialist**.
 
 It demonstrates a production grade microservice monorepo built for **frictionless developer onboarding**, **local to cloud parity**, **modular Infrastructure as
@@ -35,7 +35,7 @@ See my [introduction](https://github.com/romandmitri/introduction) repository fo
   See [.github](/.github).
 * **Architecture Docs**: Visual diagrams
   for [Local Topology](/docs/diagrams/deployment-local.mermaid), [GKE Cluster](/docs/diagrams/deployment-cluster.mermaid),
-  and [Async Flows](/docs/diagrams/flow-socket-queue.mermaid). See [docs](/docs).
+  and [Async Flows](/docs/diagrams/flow-socket-queue.mermaid). See [diagrams](/docs/diagrams).
 
 ### Videos
 
